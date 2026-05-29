@@ -93,6 +93,11 @@ def generate(prompt: str, *, llm: Optional[LLMClient] = None, mode: str = "assum
 
     final_errors = validate_all(config)
     config.metrics = metrics
+    if getattr(llm, "degraded", False):
+        config.metadata["llm_degraded"] = True
+        config.metadata["llm_note"] = (
+            "Gemini was unavailable; fell back to the deterministic engine. "
+            "Last error: " + getattr(llm, "last_error", "")[:200])
 
     in_tok = sum(m.input_tokens for m in metrics)
     out_tok = sum(m.output_tokens for m in metrics)

@@ -19,6 +19,8 @@ class GeminiClient(LLMClient):
 
         genai.configure(api_key=api_key)
         self._genai = genai
+        self.degraded = False       # set True if any stage fell back to the deterministic engine
+        self.last_error = ""
 
     def _produce(self, instruction, schema_model, *, stage, mock_builder, model):
         schema_json = json.dumps(schema_model.model_json_schema(), indent=2)
@@ -27,8 +29,8 @@ class GeminiClient(LLMClient):
             + "\n\nReturn ONLY a JSON object that conforms exactly to this JSON Schema. "
             + "No prose, no markdown.\n\nJSON Schema:\n" + schema_json
         )
-        gen_model = self._genai.GenerativeModel(model)
         try:
+            gen_model = self._genai.GenerativeModel(model)
             resp = gen_model.generate_content(
                 prompt,
                 generation_config={
@@ -36,14 +38,19 @@ class GeminiClient(LLMClient):
                     "response_mime_type": "application/json",
                 },
             )
-        except Exception as exc:  # network/quota/etc.
-            raise LLMError(f"{stage}: Gemini call failed: {exc}") from exc
-
-        raw_dict = self.parse_json(resp.text)
-        usage = getattr(resp, "usage_metadata", None)
-        in_tok = getattr(usage, "prompt_token_count", 0) or 0
-        out_tok = getattr(usage, "candidates_token_count", 0) or 0
-        return raw_dict, in_tok, out_tok, model
+            raw_dict = self.parse_json(resp.text)
+            usage = getattr(resp, "usage_metadata", None)
+            in_tok = getattr(usage, "prompt_token_count", 0) or 0
+            out_tok = getattr(usage, "candidates_token_count", 0) or 0
+            return raw_dict, in_tok, out_tok, model
+        except Exception as exc:  # quota/network/parse — degrade instead of hard-failing
+            self.degraded = True
+            self.last_error = str(exc)
+            if mock_builder is not None:
+                raw = mock_builder()
+                return (raw, max(1, len(instruction) // 4), max(1, len(str(raw)) // 4),
+                        f"mock-fallback({model})")
+            raise LLMError(f"{stage}: Gemini call failed and no fallback: {exc}") from exc
 
 
 def build_client(api_key: Optional[str], default_model: str = "gemini-2.0-flash"):
