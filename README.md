@@ -120,8 +120,8 @@ app/
   main.py      FastAPI app
 eval/          dataset.json · run_eval.py
 tests/         test_pipeline.py
-docs/superpowers/specs/   design document
+docs/          design document
 ```
 
-See [docs/superpowers/specs/2026-05-29-promptcompiler-design.md](docs/superpowers/specs/2026-05-29-promptcompiler-design.md)
+See [docs/2026-05-29-promptcompiler-design.md](docs/2026-05-29-promptcompiler-design.md)
 for the full design rationale.
