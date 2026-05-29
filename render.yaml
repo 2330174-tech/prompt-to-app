@@ -9,6 +9,9 @@ services:
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
+      # Pin Python: 3.14 (Render's current default) has no pydantic-core wheel yet.
+      - key: PYTHON_VERSION
+        value: "3.12.7"
       # Leave unset to run in free deterministic mock mode.
       # Add your free key in the Render dashboard to use Gemini.
       - key: GEMINI_API_KEY
