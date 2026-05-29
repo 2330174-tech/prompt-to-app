@@ -1,0 +1,26 @@
+{
+  "real": [
+    "Build a CRM with login, contacts, dashboard, role-based access, and premium plan with payments. Admins can see analytics.",
+    "Create a blog platform with posts, comments, user login, and an admin who can moderate content.",
+    "A project management tool with projects, tasks, assignees, and a dashboard for the team.",
+    "Online store with products, orders, customer accounts, and a premium subscription tier.",
+    "Help desk app with tickets, support agents, role-based access, and analytics for admins.",
+    "Event booking system with events, bookings, user login, and an admin dashboard.",
+    "A recipe app where users can add recipes and comments, with login.",
+    "Inventory manager with products and stock levels, manager and staff roles, and reports.",
+    "A SaaS dashboard with users, subscriptions, billing, and admin-only analytics.",
+    "Task tracker with tasks and projects, login, and a premium plan that unlocks analytics."
+  ],
+  "edge": [
+    "make an app",
+    "build something cool",
+    "A todo app but with no login, yet only admins can delete tasks.",
+    "I want a store but also it should be a blog and also a CRM.",
+    "Build a thing for managing stuff.",
+    "App with payments but no users and no login.",
+    "Dashboard with analytics but don't add any data or entities.",
+    "A social network (just make it work).",
+    "Premium features for everyone but no premium plan and no free plan.",
+    "Contacts app with role-based access but do not include any roles."
+  ]
+}
