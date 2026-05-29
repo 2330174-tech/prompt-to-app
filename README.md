@@ -8,6 +8,11 @@ contract, and a validation + repair engine guarantees the output is internally c
 and executable. It runs **100% free** — Google Gemini's free tier, or a built-in
 deterministic **mock mode** that needs no API key at all.
 
+> **🔗 Live demo:** https://promptcompiler.onrender.com  ·  **Source:** https://github.com/2330174-tech/prompt-to-app
+>
+> The live demo runs in free mock mode by default (no API key needed). On Render's free
+> tier the first request after idle can take ~50s to wake up.
+
 ```
 prompt ──▶ Intent ──▶ System Design ──▶ Schema Gen (DB→API→UI→Auth) ──▶ Refine/Link
                                                                           │
@@ -58,13 +63,34 @@ python -m eval.run_eval
 The dataset has **10 real product prompts + 10 edge cases** (vague, conflicting,
 incomplete). The harness checks each config also **boots in the runtime**.
 
-## Deploy a free live URL (Hugging Face Spaces)
+## Deployment (free)
 
-1. Create a new **Docker** Space at <https://huggingface.co/new-space>.
-2. Push this repo to it (the included `Dockerfile` is the entrypoint).
-3. Optionally add `GEMINI_API_KEY` as a Space secret to use Gemini instead of mock mode.
+Deployed on **Render's free tier** — live at <https://promptcompiler.onrender.com>.
 
-Render / Railway free tiers work too — they just run the same `uvicorn` command.
+The repo ships a `render.yaml` blueprint, so deploying is one click:
+
+1. Push the repo to GitHub (already done: <https://github.com/2330174-tech/prompt-to-app>).
+2. On [render.com](https://render.com): **New → Blueprint** → pick the repo → **Apply**.
+   Render reads `render.yaml` and configures the web service automatically.
+3. (Optional) add `GEMINI_API_KEY` under the service's **Environment** tab to use Gemini
+   instead of mock mode. No key → it runs the deterministic engine, so the URL works either way.
+
+Python is pinned to 3.12 (`.python-version`) because Render's default 3.14 has no
+prebuilt `pydantic-core` wheel yet. A `Dockerfile` is also included for Hugging Face
+Spaces / Railway / any container host.
+
+## Data & storage
+
+There is **no database** — state is in-memory and intentionally ephemeral (this is a
+compiler demo, not a hosting platform):
+
+- Generated configs + their runtimes live in a dict in [app/main.py](app/main.py), keyed by a `cid`.
+- Each generated app's data is in-memory in the [Interpreter](app/runtime/interpreter.py),
+  seeded with sample rows; live CRUD mutates it in place.
+- The LLM cache (for determinism + cost) is per-process.
+
+A restart (or Render's idle spin-down) resets everything — regenerate to get a fresh `cid`.
+Only the eval report is written to disk.
 
 ## How it satisfies the task
 
